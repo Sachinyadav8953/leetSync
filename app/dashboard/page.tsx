@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation'
 import { desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users, snapshots } from '@/lib/db/schema'
-import { getSolvedStats } from '@/lib/leetcode'
+import { getSolvedStats, getActivity } from '@/lib/leetcode'
+import { calcStreaks } from '@/lib/streaks'
+import { Heatmap } from './Heatmap'
 
 export default async function DashboardPage() {
   const { userId } = await auth()
@@ -22,7 +24,8 @@ export default async function DashboardPage() {
       </main>
     )
   }
-
+  const activity = (await getActivity(user.leetcodeUsername)) ?? {}
+  const streaks = calcStreaks(activity)
   const [last] = await db
     .select()
     .from(snapshots)
@@ -42,7 +45,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
+    <main className="mx-auto max-w-4xl p-8">
       <h1 className="mb-6 text-2xl font-bold">{user.leetcodeUsername}</h1>
       <div className="grid grid-cols-4 gap-4 text-center">
         <Stat label="Total" value={stats.total} />
@@ -50,6 +53,14 @@ export default async function DashboardPage() {
         <Stat label="Medium" value={stats.medium} />
         <Stat label="Hard" value={stats.hard} />
       </div>
+      <div className="mt-6 grid grid-cols-3 gap-4 text-center">
+        <Stat label="Current streak" value={streaks.current} />
+        <Stat label="Longest streak" value={streaks.longest} />
+        <Stat label="Active days" value={streaks.active} />
+      </div>
+
+      <h2 className="mb-2 mt-8 font-semibold">Last 12 months</h2>
+      <Heatmap activity={activity} />
     </main>
   )
 }
