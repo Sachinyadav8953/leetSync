@@ -3,10 +3,11 @@ import { redirect } from 'next/navigation'
 import { desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users, snapshots } from '@/lib/db/schema'
-import { getSolvedStats, getActivity } from '@/lib/leetcode'
+import { getSolvedStats, getActivity,getTopicStats } from '@/lib/leetcode'
 import { calcStreaks } from '@/lib/streaks'
 import { Heatmap } from './heatmap'
-
+import { rankTopics } from '@/lib/topics'
+import { TopicBars } from './topicBars'
 export default async function DashboardPage() {
   const { userId } = await auth()
   if (!userId) redirect('/')
@@ -26,6 +27,8 @@ export default async function DashboardPage() {
   }
   const activity = (await getActivity(user.leetcodeUsername)) ?? {}
   const streaks = calcStreaks(activity)
+  const topicStats = await getTopicStats(user.leetcodeUsername)
+  const { rows, weakest } = rankTopics(topicStats)
   const [last] = await db
     .select()
     .from(snapshots)
@@ -61,6 +64,11 @@ export default async function DashboardPage() {
 
       <h2 className="mb-2 mt-8 font-semibold">Last 12 months</h2>
       <Heatmap activity={activity} />
+      <h2 className="mb-2 mt-8 font-semibold">Topics</h2>
+      <p className="mb-3 text-sm text-gray-500">
+        Focus areas: {weakest.map((w) => w.name).join(', ')}
+      </p>
+      <TopicBars rows={rows} weakest={weakest} />
     </main>
   )
 }
