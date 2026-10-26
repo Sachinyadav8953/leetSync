@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { users, snapshots } from '@/lib/db/schema'
 import { getSolvedStats, getActivity } from '@/lib/leetcode'
 import { calcStreaks } from '@/lib/streaks'
-import { Heatmap } from './Heatmap'
+import { Heatmap } from './heatmap'
 
 export default async function DashboardPage() {
   const { userId } = await auth()
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
       hard: stats.hard,
     })
   }
-
+  
   return (
     <main className="mx-auto max-w-4xl p-8">
       <h1 className="mb-6 text-2xl font-bold">{user.leetcodeUsername}</h1>
@@ -66,6 +66,7 @@ export default async function DashboardPage() {
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
+  
   return (
     <div className="rounded border p-4">
       <div className="text-3xl font-bold">{value}</div>

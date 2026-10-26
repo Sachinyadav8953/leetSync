@@ -7,7 +7,6 @@ export function calcStreaks(activity: Activity) {
   const now = new Date()
   let cursor = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
 
-  // Current streak: if nothing solved yet today, start counting from yesterday
   if (!activity[key(cursor)]) cursor -= DAY
   let current = 0
   while (activity[key(cursor)]) {
@@ -15,7 +14,6 @@ export function calcStreaks(activity: Activity) {
     cursor -= DAY
   }
 
-  // Longest streak: walk through active days in order
   const days = Object.keys(activity).sort()
   let longest = 0
   let run = 0
