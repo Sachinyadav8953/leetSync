@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { users, snapshots } from '@/lib/db/schema'
 import { getSolvedStats, getActivity,getTopicStats } from '@/lib/leetcode'
 import { calcStreaks } from '@/lib/streaks'
-import { Heatmap } from '@/app/dashboard/heatmap'
+import { Heatmap } from './heatmap'
 import { rankTopics } from '@/lib/topics'
 import { TopicBars } from '@/app/dashboard/topicBars'
 export default async function DashboardPage() {
