@@ -119,3 +119,54 @@ export async function getTopicStats(username: string): Promise<Record<string, nu
   }
   return out
 }
+
+export type Problem = {
+  title: string
+  titleSlug: string
+  difficulty: string
+  acRate: number
+  isPaidOnly: boolean
+}
+
+export type Level = 'EASY' | 'MEDIUM' | 'HARD'
+
+const PROBLEMS_QUERY = `
+  query problems($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {
+    problemsetQuestionList: questionList(
+      categorySlug: $categorySlug, limit: $limit, skip: $skip, filters: $filters
+    ) {
+      questions: data {
+        title
+        titleSlug
+        difficulty
+        acRate
+        isPaidOnly
+      }
+    }
+  }
+`
+
+export async function getProblemsByTag(tagSlug: string, level?: Level): Promise<Problem[]> {
+  const filters: Record<string, unknown> = { tags: [tagSlug] }
+  if (level) filters.difficulty = level
+
+  const res = await fetch('https://leetcode.com/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Referer: 'https://leetcode.com',
+      'User-Agent': 'Mozilla/5.0',
+    },
+    body: JSON.stringify({
+      query: PROBLEMS_QUERY,
+      variables: { categorySlug: '', skip: 0, limit: 100, filters },
+    }),
+    next: { revalidate: 86400 },
+  })
+  if (!res.ok) throw new Error(`LeetCode request failed: ${res.status}`)
+
+  const json = await res.json()
+  return json.data?.problemsetQuestionList?.questionList?.questions
+    ?? json.data?.problemsetQuestionList?.questions
+    ?? []
+}
