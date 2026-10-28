@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   const activity = (await getActivity(user.leetcodeUsername)) ?? {}
   const streaks = calcStreaks(activity)
   const topicStats = await getTopicStats(user.leetcodeUsername)
-  const { rows, weakest } = rankTopics(topicStats)
+  const { rows, weak, next } = rankTopics(topicStats)
   const [last] = await db
     .select()
     .from(snapshots)
@@ -66,9 +66,9 @@ export default async function DashboardPage() {
       <Heatmap activity={activity} />
       <h2 className="mb-2 mt-8 font-semibold">Topics</h2>
       <p className="mb-3 text-sm text-gray-500">
-        Focus areas: {weakest.map((w) => w.name).join(', ')}
+        Focus areas: {weak.map((w) => w.name).join(', ')}
       </p>
-      <TopicBars rows={rows} weakest={weakest} />
+      <TopicBars rows={rows} weakest={weak} />
     </main>
   )
 }

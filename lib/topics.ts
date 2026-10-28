@@ -1,80 +1,54 @@
-export const CORE_TOPICS = [
-  'Array', 'String', 'Hash Table', 'Two Pointers', 'Sliding Window',
-  'Binary Search', 'Stack', 'Linked List', 'Tree', 'Graph',
-  'Depth-First Search', 'Breadth-First Search', 'Dynamic Programming',
-  'Greedy', 'Backtracking', 'Heap (Priority Queue)', 'Trie', 'Union Find',
-
-  'Math',
-
-  'Database',
-  'Bit Manipulation',
-  'Matrix',
-  'Prefix Sum',
-  'Tree',
-
-  'Two Pointers',
-
-  'Simulation',
-  'Counting',
-  'Graph Theory',
-
-  'Enumeration',
-  'Design',
-  'Backtracking',
-
-  'Number Theory',
-
-  'Union-Find',
-  'Segment Tree',
-
-  'Ordered Set',
-
-  'Monotonic Stack',
-  'Divide and Conquer',
-  'Combinatorics',
-  'Bitmask',
-  'Binary Indexed Tree',
-  'Recursion',
-  'Geometry',
-  'Memoization',
-  'Shortest Path',
-
-  'Rolling Hash',
-
-  'Game Theory',
-
-  'Monotonic Queue',
-  'Interactive',
-  'Data Stream',
-  'Brainteaser',
-
-  'Merge Sort',
-  'Minimax',
-  'Doubly-Linked List',
-  'Randomized',
-  'Counting Sort',
-  'Iterator',
-  'Concurrency',
-  'Suffix Array',
-  'Quickselect',
-  'Sweep Line',
-
-  'Probability and Statistics',
-  'Minimum Spanning Tree',
-  'Bucket Sort',
-
-  'Meet in the Middle',
-  'Reservoir Sampling',
-  'Eulerian Circuit',
-  'Radix Sort',
-  'Strongly Connected Component',
-  'Rejection Sampling',
-  'Biconnected Component',
-  'Heap'
+const ROADMAP: { name: string; needs: string[] }[] = [
+  { name: 'Array', needs: [] },
+  { name: 'String', needs: [] },
+  { name: 'Hash Table', needs: ['Array'] },
+  { name: 'Two Pointers', needs: ['Array'] },
+  { name: 'Sliding Window', needs: ['Two Pointers'] },
+  { name: 'Binary Search', needs: ['Array'] },
+  { name: 'Stack', needs: ['Array'] },
+  { name: 'Linked List', needs: [] },
+  { name: 'Tree', needs: ['Linked List'] },
+  { name: 'Depth-First Search', needs: ['Tree'] },
+  { name: 'Breadth-First Search', needs: ['Tree'] },
+  { name: 'Graph', needs: ['Depth-First Search', 'Breadth-First Search'] },
+  { name: 'Backtracking', needs: ['Depth-First Search'] },
+  { name: 'Heap (Priority Queue)', needs: ['Array'] },
+  { name: 'Greedy', needs: ['Array'] },
+  { name: 'Dynamic Programming', needs: ['Backtracking'] },
+  { name: 'Trie', needs: ['Tree'] },
+  { name: 'Union Find', needs: ['Graph'] },
 ]
 
+export const CORE_TOPICS = ROADMAP.map((t) => t.name)
+
+const READY_AT = 3 
+
 export function rankTopics(solved: Record<string, number>) {
-  const rows = CORE_TOPICS.map((name) => ({ name, solved: solved[name] ?? 0 }))
-  const weakest = [...rows].sort((a, b) => a.solved - b.solved).slice(0, 10)
-  return { rows, weakest }
+  const count = (n: string) => solved[n] ?? 0
+  const rows = ROADMAP.map((t) => ({ name: t.name, solved: count(t.name) }))
+
+  // Weak topics
+  const weak = rows
+    .filter((r) => r.solved > 0)
+    .sort((a, b) => a.solved - b.solved)
+    .slice(0, 5)
+
+  const notStarted = rows.filter((r) => r.solved === 0)
+
+  // Next topic to learn
+  const ready = ROADMAP.find(
+    (t) => count(t.name) === 0 && t.needs.every((n) => count(n) >= READY_AT)
+  )
+  const pick = ready ?? ROADMAP.find((t) => count(t.name) === 0)
+
+  const next = pick
+    ? {
+        name: pick.name,
+        reason: pick.needs.length
+          ? `You have a base in ${pick.needs.join(' and ')}, so this is the natural next step`
+          : 'A core fundamental you have not started yet',
+      }
+    : null
+
+  return { rows, weak, notStarted, next }
 }
