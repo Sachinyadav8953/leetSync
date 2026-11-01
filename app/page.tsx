@@ -1,5 +1,14 @@
 
-
-export default function Home() {
-  return <h1>Hello world</h1>
+import {redirect } from "next/navigation";
+import {auth} from "@clerk/nextjs/server";
+export default async function Home() {
+    const userId = await auth();
+    if(userId){
+      redirect("/onboarding");
+    }
+    else {
+      redirect("auth/signIn");
+    }
+    
+  
 }
