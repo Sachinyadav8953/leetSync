@@ -170,3 +170,28 @@ export async function getProblemsByTag(tagSlug: string, level?: Level): Promise<
     ?? json.data?.problemsetQuestionList?.questions
     ?? []
 }
+const RECENT_QUERY = `
+  query recent($username: String!, $limit: Int) {
+    recentAcSubmissionList(username: $username, limit: $limit) {
+      titleSlug
+    }
+  }
+`
+
+export async function getRecentSolved(username: string): Promise<string[]> {
+  const res = await fetch('https://leetcode.com/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Referer: 'https://leetcode.com',
+      'User-Agent': 'Mozilla/5.0',
+    },
+    body: JSON.stringify({ query: RECENT_QUERY, variables: { username, limit: 20 } }),
+    next: { revalidate: 600 },
+  })
+  if (!res.ok) return []
+
+  const json = await res.json()
+  const list: { titleSlug: string }[] = json.data?.recentAcSubmissionList ?? []
+  return list.map((s) => s.titleSlug)
+}
