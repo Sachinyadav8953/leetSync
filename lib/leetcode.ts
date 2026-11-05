@@ -30,8 +30,10 @@ export async function getSolvedStats(username: string): Promise<SolvedStats | nu
   })
 
   if (!res.ok) throw new Error(`LeetCode request failed: ${res.status}`)
+  console.log(res);
 
   const json = await res.json()
+  console.log(json);
   const list: { difficulty: string; count: number }[] | undefined =
     json.data?.matchedUser?.submitStatsGlobal?.acSubmissionNum
   
